@@ -32,5 +32,7 @@ jobs:
 
 
   Call-next-workflow:
+    permissions:
+      contents: read
     needs: docker-templates
     uses: PFM-PowerForMe/vaultwarden/.github/workflows/container-hadolint.yml@workflow
