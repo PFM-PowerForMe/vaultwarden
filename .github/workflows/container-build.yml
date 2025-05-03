@@ -66,9 +66,10 @@ jobs:
 
       # Checkout the repo
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
+        uses: actions/checkout@v4 #v4.2.2
         # We need fetch-depth of 0 so we also get all the tag metadata
         with:
+          ref: main
           persist-credentials: false
           fetch-depth: 0
 
