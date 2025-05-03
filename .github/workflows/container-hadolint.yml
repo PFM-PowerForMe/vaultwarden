@@ -6,7 +6,7 @@ on:
   workflow_run:
     workflows: ["Container Check templates"]
     types:
-      - completed:
+      - completed
 
 jobs:
   hadolint:
