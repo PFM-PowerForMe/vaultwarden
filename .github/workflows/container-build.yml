@@ -4,12 +4,6 @@ permissions: {}
 on:
   workflow_dispatch:  # click the button on Github repo!
   workflow_call:
-  push:
-    branches:
-      - main
-    tags:
-      # https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
-      - '[1-2].[0-9]+.[0-9]+'
 
 jobs:
   docker-build:
@@ -83,17 +77,18 @@ jobs:
           if [[ "${REF_TYPE}" == "tag" ]]; then
             echo "BASE_TAGS=latest,${GITHUB_REF#refs/*/}" | tee -a "${GITHUB_ENV}"
           elif [[ "${REF_TYPE}" == "branch" ]]; then
-            echo "BASE_TAGS=testing" | tee -a "${GITHUB_ENV}"
+            echo "BASE_TAGS=main" | tee -a "${GITHUB_ENV}"
           fi
 
           # Get the Source Version for this release
-          GIT_EXACT_TAG="$(git describe --tags --abbrev=0 --exact-match 2>/dev/null || true)"
-          if [[ -n "${GIT_EXACT_TAG}" ]]; then
-              echo "SOURCE_VERSION=${GIT_EXACT_TAG}" | tee -a "${GITHUB_ENV}"
-          else
-              GIT_LAST_TAG="$(git describe --tags --abbrev=0)"
-              echo "SOURCE_VERSION=${GIT_LAST_TAG}-${SOURCE_COMMIT:0:8}" | tee -a "${GITHUB_ENV}"
-          fi
+          #GIT_EXACT_TAG="$(git describe --tags --abbrev=0 --exact-match 2>/dev/null || true)"
+          #if [[ -n "${GIT_EXACT_TAG}" ]]; then
+              #echo "SOURCE_VERSION=${GIT_EXACT_TAG}" | tee -a "${GITHUB_ENV}"
+          #else
+              #GIT_LAST_TAG="$(git describe --tags --abbrev=0)"
+              #echo "SOURCE_VERSION=${GIT_LAST_TAG}-${SOURCE_COMMIT:0:8}" | tee -a "${GITHUB_ENV}"
+          #fi
+          echo "SOURCE_VERSION=$(git rev-parse HEAD 2>/dev/null || true)-$(date +'%Y-%m-%d')" | tee -a "${GITHUB_ENV}"
       # End Determine Base Tags
 
       # Login to Docker Hub
