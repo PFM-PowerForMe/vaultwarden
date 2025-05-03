@@ -3,10 +3,7 @@ permissions: {}
 
 on:
   workflow_dispatch:  # click the button on Github repo!
-  workflow_run:
-    workflows: ["Test Build"]
-    types:
-      - completed
+  workflow_call:
 
 jobs:
   docker-templates:	
