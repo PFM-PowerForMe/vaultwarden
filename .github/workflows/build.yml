@@ -1,7 +1,9 @@
-name: Build
+name: Test Build
 permissions: {}
 
 on:
+  workflow_dispatch:  # click the button on Github repo!
+
   push:
     branches:
       - main
