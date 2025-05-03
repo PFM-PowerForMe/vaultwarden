@@ -58,3 +58,12 @@ jobs:
           echo "Checking docker/Dockerfile.alpine"
           docker build --check . -f docker/Dockerfile.alpine
       # End Test Dockerfiles with docker build checks
+
+  Call-next-workflow:
+    permissions:
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
+    needs: hadolint
+    uses: ./.github/workflows/container-build.yml
