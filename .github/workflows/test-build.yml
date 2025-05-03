@@ -228,15 +228,9 @@ jobs:
           echo "### :tada: Checks Passed!" >> "${GITHUB_STEP_SUMMARY}"
           echo "" >> "${GITHUB_STEP_SUMMARY}"
 
-      # Checkout the repo
-      - name: "Checkout to workflow branch"
-        uses: actions/checkout@v4
-        with:
-          ref: workflow
-          persist-credentials: false
-          fetch-depth: 0
-      # End Checkout the repo
+  Call-next-workflow:
+    permissions:
+      contents: read
+    needs: Build and Test ${{ matrix.channel }}
+    uses: ./.github/workflows/container-check-templates.yml
 
-      - name: "Next workflow"
-        if: ${{ success() }}
-        uses: ./.github/workflows/container-check-templates
