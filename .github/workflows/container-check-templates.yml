@@ -41,4 +41,4 @@ jobs:
 
       - name: "Next workflow"
         if: ${{ success() }}
-        run: pwd && echo $HOME
+        run: pwd && echo $HOME && ls -al && ls -al ./.github/workflows
