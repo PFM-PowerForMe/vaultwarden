@@ -3,7 +3,10 @@ permissions: {}
 
 on:
   workflow_dispatch:  # click the button on Github repo!
-  workflow_call:
+  workflow_run:
+    workflows: ["Test Build"]
+    types:
+      - completed
 
 jobs:
   docker-templates:	
@@ -40,5 +43,4 @@ jobs:
       # End Checkout the repo
 
       - name: "Next workflow"
-        if: ${{ success() }}
         uses: ./.github/workflows/container-hadolint.yml

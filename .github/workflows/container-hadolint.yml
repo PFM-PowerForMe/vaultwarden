@@ -3,7 +3,10 @@ permissions: {}
 
 on:
   workflow_dispatch:  # click the button on Github repo!
-  workflow_call:
+  workflow_run:
+    workflows: ["Container Check templates"]
+    types:
+      - completed:
 
 jobs:
   hadolint:
