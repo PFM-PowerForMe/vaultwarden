@@ -240,4 +240,3 @@ jobs:
       - name: "Next workflow"
         if: ${{ success() }}
         uses: ./.github/workflows/container-check-templates
-        
