@@ -227,3 +227,17 @@ jobs:
         run: |
           echo "### :tada: Checks Passed!" >> "${GITHUB_STEP_SUMMARY}"
           echo "" >> "${GITHUB_STEP_SUMMARY}"
+
+      # Checkout the repo
+      - name: "Checkout to workflow branch"
+        uses: actions/checkout@v4
+        with:
+          ref: workflow
+          persist-credentials: false
+          fetch-depth: 0
+      # End Checkout the repo
+
+      - name: "Next workflow"
+        if: ${{ success() }}
+        uses: ./.github/workflows/container-check-templates
+        
