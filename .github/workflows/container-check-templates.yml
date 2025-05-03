@@ -32,15 +32,3 @@ jobs:
         working-directory: docker
         run: git diff --exit-code
         continue-on-error: false
-
-      # Checkout the repo
-      - name: "Checkout to workflow branch"
-        uses: actions/checkout@v4
-        with:
-          ref: workflow
-          persist-credentials: false
-          fetch-depth: 0
-      # End Checkout the repo
-
-      - name: "Next workflow"
-        uses: ./.github/workflows/container-hadolint.yml
