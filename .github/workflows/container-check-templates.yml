@@ -42,5 +42,4 @@ jobs:
 
       - name: "Next workflow"
         if: ${{ success() }}
-        working-directory: workflow
-        uses: ./.github/workflows/container-hadolint
+        uses: ./workflow/.github/workflows/container-hadolint
