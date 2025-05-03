@@ -33,6 +33,9 @@ jobs:
 
   Call-next-workflow:
     permissions:
+      packages: write
       contents: read
+      attestations: write
+      id-token: write
     needs: docker-templates
     uses: ./.github/workflows/container-hadolint.yml

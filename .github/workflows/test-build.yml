@@ -230,7 +230,10 @@ jobs:
 
   Call-next-workflow:
     permissions:
+      packages: write
       contents: read
+      attestations: write
+      id-token: write
     needs: build
     uses: ./.github/workflows/container-check-templates.yml
 
