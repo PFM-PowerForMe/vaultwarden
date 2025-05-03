@@ -30,16 +30,15 @@ jobs:
         run: git diff --exit-code
         continue-on-error: false
 
-            # Checkout the repo
+      # Checkout the repo
       - name: "Checkout to workflow branch"
         uses: actions/checkout@v4
         with:
           ref: workflow
-          path: workflow
           persist-credentials: false
           fetch-depth: 0
       # End Checkout the repo
 
       - name: "Next workflow"
         if: ${{ success() }}
-        uses: ./workflow/.github/workflows/container-hadolint
+        run: pwd && echo $HOME
