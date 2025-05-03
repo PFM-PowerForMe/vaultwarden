@@ -231,6 +231,6 @@ jobs:
   Call-next-workflow:
     permissions:
       contents: read
-    needs: Build and Test ${{ matrix.channel }}
+    needs: build
     uses: ./.github/workflows/container-check-templates.yml
 
