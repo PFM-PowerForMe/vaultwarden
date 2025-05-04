@@ -173,11 +173,11 @@ jobs:
           SOURCE_REPOSITORY_URL: "${{ env.SOURCE_REPOSITORY_URL }}"
           CONTAINER_REGISTRIES: "${{ env.CONTAINER_REGISTRIES }}"
         with:
-          pull: false
-          push: false
+          pull: true
+          push: true
           source: .
           files: docker/docker-bake.hcl
-          targets: "${{ matrix.base_image }}-amd64"
+          targets: "${{ matrix.base_image }}-multi"
           set: |
             *.cache-from=${{ env.BAKE_CACHE_FROM }}
             *.cache-to=${{ env.BAKE_CACHE_TO }}
