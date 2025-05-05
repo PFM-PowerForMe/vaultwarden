@@ -76,3 +76,6 @@ jobs:
         with:
           api_token: ${{ secrets.KOYEB_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy to Koyeb
+        run: koyeb service redeploy my-services/vaultwarden
