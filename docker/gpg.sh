@@ -3,13 +3,9 @@
 # 禁止输出到屏幕
 log_user 0
 
-set key_ids {
-    "$env(ENCRYPTION_PUB_ID)"
-}
-
 set trust_level "5"
 
-spawn gpg --edit-key $key_id
+spawn gpg --edit-key $env(ENCRYPTION_PUB_ID)
 expect "gpg\>"
 send "trust\r"
 expect "Your decision?"
