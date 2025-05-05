@@ -4,12 +4,14 @@ RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shangh
 
 RUN apt-get update && apt-get install -y \
         --no-install-recommends \
-        cron tar 7zip unzip && \
+        cron tar 7zip unzip gnupg && \
     apt-get clean
 
 RUN curl https://gosspublic.alicdn.com/ossutil/install.sh | bash
 
-RUN echo '* * * * * root sh -c "/backup.sh"' >> /etc/crontab
+RUN rm -rf /tmp/*
+
+RUN echo '0 6 * * * root sh -c "/backup.sh"' >> /etc/crontab
 
 COPY docker/backup.sh /backup.sh
 COPY docker/start-debian.sh /start-debian.sh

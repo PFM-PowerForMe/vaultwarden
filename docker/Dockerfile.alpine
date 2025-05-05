@@ -6,11 +6,14 @@ RUN apk --no-cache add \
         bash \
         tar \
         7zip \
-        unzip
+        unzip \
+        gnupg
 
 RUN curl https://gosspublic.alicdn.com/ossutil/install.sh | bash
 
-RUN echo '* * * * * root sh -c "/backup.sh"' >> /etc/crontab
+RUN rm -rf /tmp/*
+
+RUN echo '0 6 * * * root sh -c "/backup.sh"' >> /etc/crontab
 
 COPY docker/backup.sh /backup.sh
 COPY docker/start-alpine.sh /start-alpine.sh
