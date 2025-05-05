@@ -2,14 +2,14 @@ FROM --platform=$TARGETPLATFORM ghcr.io/pfm-powerforme/vaultwarden:main
 
 RUN apt-get update && apt-get install -y \
         --no-install-recommends \
-        cronie && \
+        cron && \
     apt-get clean
 
 RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shanghai > /etc/timezone
 
 RUN echo '* * * * * root sh -c "/backup.sh"' >> /etc/crontab
 
-RUN service start cronie.service
+RUN update-rc.d cron enable && service cron start
 
 COPY docker/backup.sh /backup.sh
 
