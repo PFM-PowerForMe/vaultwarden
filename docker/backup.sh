@@ -14,6 +14,7 @@ if [ -n "$GPG_PUBKEY" ] && [ -n "$GPG_KEYID" ]; then
     else
         echo "密钥 $GPG_KEYID 未导入,导入中..." > /proc/1/fd/1 2>/proc/1/fd/2
         echo "$GPG_PUBKEY" | gpg --import
+        expect -f /gpg.sh
     fi
 else
     echo "未配置GPG环境变量" > /proc/1/fd/1 2>/proc/1/fd/2
