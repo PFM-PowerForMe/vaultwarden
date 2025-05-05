@@ -1,11 +1,13 @@
 FROM --platform=$TARGETPLATFORM ghcr.io/pfm-powerforme/vaultwarden:main
 
+RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shanghai > /etc/timezone
+
 RUN apt-get update && apt-get install -y \
         --no-install-recommends \
-        cron && \
+        cron tar 7zip unzip && \
     apt-get clean
 
-RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shanghai > /etc/timezone
+RUN curl https://gosspublic.alicdn.com/ossutil/install.sh | sh
 
 RUN echo '* * * * * root sh -c "/backup.sh"' >> /etc/crontab
 
