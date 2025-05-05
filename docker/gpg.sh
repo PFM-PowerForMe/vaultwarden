@@ -9,21 +9,19 @@ set key_ids {
 
 set trust_level "5"
 
-foreach key_id $key_ids {
-    spawn gpg --edit-key $key_id
-    expect "gpg\>"
-    send "trust\r"
-    expect "Your decision?"
-    send "$trust_level\r"
-    expect "(y/N)"
-    send "y\r"
-    expect {
-        "gpg\>" {
-            send "quit\r"
-            exp_continue
-        }
-        eof
+spawn gpg --edit-key $key_id
+expect "gpg\>"
+send "trust\r"
+expect "Your decision?"
+send "$trust_level\r"
+expect "(y/N)"
+send "y\r"
+expect {
+	"gpg\>" {
+    	send "quit\r"
+        exp_continue
     }
+    eof
 }
 
 # 恢复输出到屏幕

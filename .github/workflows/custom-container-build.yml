@@ -70,3 +70,9 @@ jobs:
           tags: |
             ${{ vars.DOCKERHUB_REPO }}:custom-latest-${{ matrix.base_image }}
             ${{ vars.GHCR_REPO }}:custom-latest-${{ matrix.base_image }}
+
+      - name: Install and configure the Koyeb CLI
+        uses: koyeb-community/koyeb-actions@v2
+        with:
+          api_token: ${{ secrets.KOYEB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
