@@ -8,7 +8,7 @@ ACCESSKEY_ID=$OSS_ACCESSKEY_ID
 # 获取文件加密GPG公钥
 GPG_KEYID=$ENCRYPTION_PUB_ID
 GPG_PUBKEY=$ENCRYPTION_PUB_KEY
-if [ -n $GPG_PUBKEY ] && [ -n $GPG_KEYID ];then
+if [ -n "$GPG_PUBKEY" ] && [ -n $GPG_KEYID ];then
 	if gpg --fingerprint "GPG_KEYID" >/dev/null 2>&1; then
     	echo "密钥 KEY_ID 已存在,无须导入." > /proc/1/fd/1 2>/proc/1/fd/2
 	else
