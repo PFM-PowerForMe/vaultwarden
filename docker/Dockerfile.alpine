@@ -20,6 +20,6 @@ COPY docker/backup.sh /backup.sh
 COPY docker/gpg.sh /gpg.sh
 COPY docker/start-alpine.sh /start-alpine.sh
 
-RUN chmod +x /gpg.sh && chmod +x /backup.sh && chmod +x /start-debian.sh
+RUN chmod +x /gpg.sh && chmod +x /backup.sh && chmod +x /start-alpine.sh
 
 CMD ["/start-alpine.sh"]
