@@ -290,3 +290,12 @@ jobs:
         with:
           subject-path: vaultwarden-*
       # End Upload artifacts to Github Actions
+
+  Call-next-workflow:
+    permissions:
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
+    needs: docker-build
+    uses: ./.github/workflows/custom-container-build.yml

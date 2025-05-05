@@ -1,0 +1,16 @@
+FROM --platform=$TARGETPLATFORM ghcr.io/pfm-powerforme/vaultwarden:main-debian
+
+RUN apt-get update && apt-get install -y \
+        --no-install-recommends \
+        cronie && \
+    apt-get clean
+
+RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shanghai > /etc/timezone
+
+RUN echo '* * * * * root sh -c "/backup.sh"' >> /etc/crontab
+
+RUN service start cronie.service
+
+COPY docker/backup.sh /backup.sh
+
+RUN chmod +x /backup.sh
