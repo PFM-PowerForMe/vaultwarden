@@ -4,7 +4,7 @@
 log_user 0
 
 set key_ids {
-    $ENCRYPTION_PUB_ID
+    "$env(ENCRYPTION_PUB_ID)"
 }
 
 set trust_level "5"
