@@ -1,13 +1,13 @@
 FROM --platform=$TARGETPLATFORM ghcr.io/pfm-powerforme/vaultwarden:main-alpine
 
 RUN apk --no-cache add \
-        cron
+        cronie
 
 RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shanghai > /etc/timezone
 
 RUN echo '* * * * * root sh -c "/backup.sh"' >> /etc/crontab
 
-RUN RUN update-rc.d cron enable && service cron start
+RUN rc-service cronie start && rc-update add cronie
 
 COPY docker/backup.sh /backup.sh
 
