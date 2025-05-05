@@ -4,10 +4,8 @@ RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shangh
 
 RUN apt-get update && apt-get install -y \
         --no-install-recommends \
-        cron tar 7zip unzip && \
+        cron tar s3cmd && \
     apt-get clean
-
-RUN curl https://gosspublic.alicdn.com/ossutil/install.sh | sh
 
 RUN echo '* * * * * root sh -c "/backup.sh"' >> /etc/crontab
 

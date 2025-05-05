@@ -4,10 +4,7 @@ RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shangh
 
 RUN apk --no-cache add \
         tar \
-        7zip \
-        unzip
-
-RUN curl https://gosspublic.alicdn.com/ossutil/install.sh | sh
+        s3cmd
 
 RUN echo '* * * * * root sh -c "/backup.sh"' >> /etc/crontab
 
