@@ -9,8 +9,9 @@ RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shangh
 
 RUN echo '* * * * * root sh -c "/backup.sh"' >> /etc/crontab
 
-RUN update-rc.d cron enable && service cron start
-
 COPY docker/backup.sh /backup.sh
+COPY docker/start-debian.sh /start-debian.sh
 
-RUN chmod +x /backup.sh
+RUN chmod +x /backup.sh && chmod +x /start-debian.sh
+
+CMD ["/start-debian.sh"]

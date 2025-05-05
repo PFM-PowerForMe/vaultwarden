@@ -5,7 +5,8 @@ RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shangh
 RUN echo '* * * * * root sh -c "/backup.sh"' >> /etc/crontab
 
 COPY docker/backup.sh /backup.sh
+COPY docker/start-alpine.sh /start-alpine.sh
 
-RUN chmod +x /backup.sh
+RUN chmod +x /backup.sh && chmod +x /start-alpine.sh
 
-CMD ["crond && /start.sh"]
+CMD ["/start-alpine.sh"]
