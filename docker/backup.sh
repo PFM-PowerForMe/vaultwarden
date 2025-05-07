@@ -1,46 +1,128 @@
 #!/bin/sh
+set -euo pipefail
 
-# 获取阿里云环境变量
-ACCESSKEY_SECRET=$OSS_ACCESSKEY_SECRET
-ENDPOINT=$OSS_ENDPOINT
-ACCESSKEY_ID=$OSS_ACCESSKEY_ID
+# Docker日志输出函数
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" > /proc/1/fd/1 2>/proc/1/fd/2
+}
 
-# 获取文件加密GPG公钥
-GPG_KEYID=$ENCRYPTION_PUB_ID
-GPG_PUBKEY=$ENCRYPTION_PUB_KEY
-if [ -n "$GPG_PUBKEY" ] && [ -n "$GPG_KEYID" ]; then
-    if gpg --fingerprint "$GPG_KEYID" >/dev/null 2>&1; then
-        echo "密钥 $GPG_KEYID 已存在,无须导入." > /proc/1/fd/1 2>/proc/1/fd/2
-    else
-        echo "密钥 $GPG_KEYID 未导入,导入中..." > /proc/1/fd/1 2>/proc/1/fd/2
-        echo "$GPG_PUBKEY" | gpg --import
-        expect -f /gpg.sh
+# 验证必要环境变量
+required_vars=(
+    "OSS_ACCESSKEY_SECRET"
+    "OSS_ENDPOINT"
+    "OSS_ACCESSKEY_ID"
+    "ENCRYPTION_PUB_ID"
+    "ENCRYPTION_PUB_KEY"
+)
+
+for var in "${required_vars[@]}"; do
+    if [ -z "${!var:-}" ]; then
+        log "错误: 必须的环境变量 $var 未设置"
+        exit 1
     fi
-else
-    echo "未配置GPG环境变量" > /proc/1/fd/1 2>/proc/1/fd/2
-    exit 1
-fi
+done
 
-if [ -n "$ACCESSKEY_SECRET" ] && [ -n "$ENDPOINT" ] && [ -n "$ACCESSKEY_ID" ]; then
+# 配置OSS
+configure_oss() {
     cat << EOF > /tmp/ossconfig
 [Credentials]
 language=CH
-accessKeySecret=$ACCESSKEY_SECRET
-endpoint=$ENDPOINT
-accessKeyID=$ACCESSKEY_ID
+accessKeySecret=$OSS_ACCESSKEY_SECRET
+endpoint=$OSS_ENDPOINT
+accessKeyID=$OSS_ACCESSKEY_ID
 EOF
-    
-    # 开始备份
-    tar -zcvf - /data | gpg --recipient "$GPG_KEYID" -e -o - | dd of=/tmp/vaultwarden.enc
-    ossutil cp /tmp/vaultwarden.enc oss://my-server-backup/file/ -f --maxupspeed 4096 -c /tmp/ossconfig
-    # 上传成功
-    echo "$(date +'%Y-%m-%d') 备份成功." > /proc/1/fd/1 2>/proc/1/fd/2
-else
-    echo "未配置OSS环境变量" > /proc/1/fd/1 2>/proc/1/fd/2
-    exit 1
-fi
+    chmod 600 /tmp/ossconfig
+}
 
-# 清理文件
-rm -rf /tmp/ossconfig
-rm -rf /tmp/vaultwarden.enc
+# 处理GPG密钥
+handle_gpg_key() {
+    if gpg --fingerprint "$ENCRYPTION_PUB_ID" >/dev/null 2>&1; then
+        log "密钥 $ENCRYPTION_PUB_ID 已存在,无须导入."
+    else
+        log "密钥 $ENCRYPTION_PUB_ID 未导入,导入中..."
+        echo "$ENCRYPTION_PUB_KEY" | gpg --import
+        if ! expect -f /gpg.sh; then
+            log "GPG密钥信任设置失败"
+            exit 1
+        fi
+    fi
+}
+
+# 执行备份
+perform_backup() {
+    local timestamp=$(date +'%Y-%m-%d')
+    local backup_file="/tmp/vaultwarden_${timestamp}.enc"
+    
+    log "开始备份 /data 目录"
+    if ! tar -zcvf - /data | gpg --recipient "$ENCRYPTION_PUB_ID" --encrypt --output "$backup_file"; then
+        log "备份加密失败"
+        exit 1
+    fi
+
+    log "上传备份到 OSS"
+    local max_retries=3
+    local retry_count=0
+    local success=false
+    
+    while [ $retry_count -lt $max_retries ]; do
+        if ossutil cp "$backup_file" "oss://my-server-backup/file/" \
+            -c /tmp/ossconfig \
+            --maxupspeed 4096; then
+            success=true
+            break
+        fi
+        retry_count=$((retry_count+1))
+        log "上传尝试 $retry_count 失败，正在重试..."
+        sleep 5
+    done
+
+    if ! $success; then
+        log "上传失败，已达最大重试次数 $max_retries"
+        exit 1
+    fi
+
+    log "备份成功: vaultwarden_${timestamp}.enc"
+}
+
+# 清理旧备份(保留最近7天)
+clean_old_backups() {
+    log "开始清理7天前的旧备份"
+    
+    local cutoff_date=$(date -d "7 days ago" +'%Y-%m-%d')
+    local backup_list=$(ossutil ls oss://my-server-backup/file/ -c /tmp/ossconfig)
+    
+    echo "$backup_list" | awk '/vaultwarden_.*\.enc/ {print $NF}' | while read -r object; do
+        local file_date=$(echo "$object" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        
+        if [[ "$file_date" < "$cutoff_date" ]]; then
+            log "删除旧备份: $object"
+            if ! ossutil rm "$object" -c /tmp/ossconfig; then
+                log "警告: 删除 $object 失败"
+            fi
+        fi
+    done
+    
+    log "旧备份清理完成"
+}
+
+# 主流程
+main() {
+    handle_gpg_key
+    configure_oss
+    
+    # 检查OSS连接
+    if ! ossutil ls oss://my-server-backup -c /tmp/ossconfig >/dev/null; then
+        log "无法连接到OSS存储桶，请检查凭证"
+        exit 1
+    fi
+    
+    perform_backup
+    clean_old_backups
+    
+    # 清理临时文件
+    rm -f /tmp/ossconfig
+    rm -f /tmp/vaultwarden_*.enc
+}
+
+main
 exit 0
