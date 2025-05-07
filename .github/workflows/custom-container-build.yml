@@ -71,6 +71,14 @@ jobs:
             ${{ vars.DOCKERHUB_REPO }}:custom-latest-${{ matrix.base_image }}
             ${{ vars.GHCR_REPO }}:custom-latest-${{ matrix.base_image }}
 
+  ReDeploy:
+    name: Deploy to Koyeb
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
       - name: Install and configure the Koyeb CLI
         uses: koyeb-community/koyeb-actions@v2
         with:
