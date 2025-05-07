@@ -7,20 +7,16 @@ log() {
 }
 
 # 验证必要环境变量
-required_vars=(
-    "OSS_ACCESSKEY_SECRET"
-    "OSS_ENDPOINT"
-    "OSS_ACCESSKEY_ID"
-    "ENCRYPTION_PUB_ID"
-    "ENCRYPTION_PUB_KEY"
-)
-
-for var in "${required_vars[@]}"; do
-    if [ -z "${!var:-}" ]; then
-        log "错误: 必须的环境变量 $var 未设置"
-        exit 1
-    fi
-done
+check_env() {
+    for var in OSS_ACCESSKEY_SECRET OSS_ENDPOINT OSS_ACCESSKEY_ID \
+               ENCRYPTION_PUB_ID ENCRYPTION_PUB_KEY; do
+        eval "value=\$$var"
+        if [ -z "${value}" ]; then
+            log "错误: 必须的环境变量 $var 未设置"
+            exit 1
+        fi
+    done
+}
 
 # 配置OSS
 configure_oss() {
@@ -40,8 +36,11 @@ handle_gpg_key() {
         log "密钥 $ENCRYPTION_PUB_ID 已存在,无须导入."
     else
         log "密钥 $ENCRYPTION_PUB_ID 未导入,导入中..."
-        echo "$ENCRYPTION_PUB_KEY" | gpg --import
-        if ! expect -f /gpg.sh; then
+        if ! echo "$ENCRYPTION_PUB_KEY" | gpg --import; then
+            log "GPG密钥导入失败"
+            exit 1
+        fi
+        if [ -f "/gpg.sh" ] && ! expect -f /gpg.sh; then
             log "GPG密钥信任设置失败"
             exit 1
         fi
@@ -50,51 +49,62 @@ handle_gpg_key() {
 
 # 执行备份
 perform_backup() {
-    local timestamp=$(date +'%Y-%m-%d')
-    local backup_file="/tmp/vaultwarden_${timestamp}.enc"
+    timestamp=$(date +'%Y-%m-%d')
+    backup_file="/tmp/vaultwarden_${timestamp}.enc"
+    temp_file="/tmp/vaultwarden_temp.tar.gz"
     
     log "开始备份 /data 目录"
-    if ! tar -zcvf - /data | gpg --recipient "$ENCRYPTION_PUB_ID" --encrypt --output "$backup_file"; then
-        log "备份加密失败"
+    if ! tar -zcvf "$temp_file" -C /data .; then
+        log "备份打包失败"
+        rm -f "$temp_file"
         exit 1
     fi
-
-    log "上传备份到 OSS"
-    local max_retries=3
-    local retry_count=0
-    local success=false
     
-    while [ $retry_count -lt $max_retries ]; do
+    if ! gpg --recipient "$ENCRYPTION_PUB_ID" --encrypt --output "$backup_file" "$temp_file"; then
+        log "备份加密失败"
+        rm -f "$temp_file"
+        exit 1
+    fi
+    
+    rm -f "$temp_file"
+    
+    log "上传备份到 OSS"
+    max_retries=3
+    retry_count=0
+    
+    while [ "$retry_count" -lt "$max_retries" ]; do
         if ossutil cp "$backup_file" "oss://my-server-backup/file/" \
             -c /tmp/ossconfig \
             --maxupspeed 4096; then
-            success=true
-            break
+            log "备份成功: vaultwarden_${timestamp}.enc"
+            rm -f "$backup_file"
+            return 0
         fi
+        
         retry_count=$((retry_count+1))
         log "上传尝试 $retry_count 失败，正在重试..."
         sleep 5
     done
-
-    if ! $success; then
-        log "上传失败，已达最大重试次数 $max_retries"
-        exit 1
-    fi
-
-    log "备份成功: vaultwarden_${timestamp}.enc"
+    
+    log "上传失败，已达最大重试次数 $max_retries"
+    exit 1
 }
 
 # 清理旧备份(保留最近7天)
 clean_old_backups() {
     log "开始清理7天前的旧备份"
+    cutoff_date=$(date -d "7 days ago" +'%Y-%m-%d')
     
-    local cutoff_date=$(date -d "7 days ago" +'%Y-%m-%d')
-    local backup_list=$(ossutil ls oss://my-server-backup/file/ -c /tmp/ossconfig)
+    if ! backup_list=$(ossutil ls oss://my-server-backup/file/ -c /tmp/ossconfig); then
+        log "获取备份列表失败"
+        return 1
+    fi
     
-    echo "$backup_list" | awk '/vaultwarden_.*\.enc/ {print $NF}' | while read -r object; do
-        local file_date=$(echo "$object" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')
+    echo "$backup_list" | while read -r line; do
+        object=$(echo "$line" | awk '{print $NF}')
+        file_date=$(echo "$object" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')
         
-        if [[ "$file_date" < "$cutoff_date" ]]; then
+        if [ -n "$file_date" ] && [ "$file_date" \< "$cutoff_date" ]; then
             log "删除旧备份: $object"
             if ! ossutil rm "$object" -c /tmp/ossconfig; then
                 log "警告: 删除 $object 失败"
@@ -107,6 +117,7 @@ clean_old_backups() {
 
 # 主流程
 main() {
+    check_env
     handle_gpg_key
     configure_oss
     
