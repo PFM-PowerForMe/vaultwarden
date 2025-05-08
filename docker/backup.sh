@@ -73,7 +73,7 @@ perform_backup() {
     retry_count=0
     
     while [ "$retry_count" -lt "$max_retries" ]; do
-        if ossutil cp "$backup_file" "oss://my-server-backup/file/" \
+        if ossutil cp "$backup_file" "oss://my-server-backup/file/" -f \
             -c /tmp/ossconfig \
             --maxupspeed 4096; then
             log "备份成功: vaultwarden_${timestamp}.enc"
