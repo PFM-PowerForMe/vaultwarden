@@ -5,7 +5,7 @@ permissions:
 
 on:
   schedule:
-    - cron: "0 4 * * *" # At 04:00, every day
+    - cron: "0 22 * * *" # At UTC 22:00, every day
   workflow_dispatch:  # click the button on Github repo!
     inputs:
       sync_test_mode: # Adds a boolean option that appears during manual workflow run for easy test mode config
