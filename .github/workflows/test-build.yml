@@ -7,32 +7,10 @@ on:
   push:
     branches:
       - main
-    paths:
-      - ".github/workflows/build.yml"
-      - "src/**"
-      - "migrations/**"
-      - "Cargo.*"
-      - "build.rs"
-      - "rust-toolchain.toml"
-      - "rustfmt.toml"
-      - "diesel.toml"
-      - "docker/Dockerfile.j2"
-      - "docker/DockerSettings.yaml"
 
   pull_request:
     branches:
       - main
-    paths:
-      - ".github/workflows/build.yml"
-      - "src/**"
-      - "migrations/**"
-      - "Cargo.*"
-      - "build.rs"
-      - "rust-toolchain.toml"
-      - "rustfmt.toml"
-      - "diesel.toml"
-      - "docker/Dockerfile.j2"
-      - "docker/DockerSettings.yaml"
 
 jobs:
   build:
@@ -228,12 +206,90 @@ jobs:
           echo "### :tada: Checks Passed!" >> "${GITHUB_STEP_SUMMARY}"
           echo "" >> "${GITHUB_STEP_SUMMARY}"
 
+  docker-templates:
+    needs: build
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      # Checkout the repo
+      - name: "Checkout"
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      # End Checkout the repo
+
+      - name: Run make to rebuild templates
+        working-directory: docker
+        run: make 
+
+      - name: Check for unstaged changes
+        working-directory: docker
+        run: git diff --exit-code
+        continue-on-error: false
+
+  hadolint:
+    needs: docker-templates
+    name: Validate Dockerfile syntax
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      # Start Docker Buildx
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+        # https://github.com/moby/buildkit/issues/3969
+        # Also set max parallelism to 2, the default of 4 breaks GitHub Actions and causes OOMKills
+        with:
+          buildkitd-config-inline: |
+            [worker.oci]
+              max-parallelism = 2
+          driver-opts: |
+            network=host
+
+      # Download hadolint - https://github.com/hadolint/hadolint/releases
+      - name: Download hadolint
+        shell: bash
+        run: |
+          sudo curl -L https://github.com/hadolint/hadolint/releases/download/v${HADOLINT_VERSION}/hadolint-$(uname -s)-$(uname -m) -o /usr/local/bin/hadolint && \
+          sudo chmod +x /usr/local/bin/hadolint
+        env:
+          HADOLINT_VERSION: 2.12.0
+      # End Download hadolint
+      # Checkout the repo
+      - name: Checkout
+        uses: actions/checkout@v4 #v4.2.2
+        with:
+          ref: main
+          persist-credentials: false
+      # End Checkout the repo
+
+      # Test Dockerfiles with hadolint
+      - name: Run hadolint
+        shell: bash
+        run: hadolint docker/Dockerfile.{debian,alpine}
+      # End Test Dockerfiles with hadolint
+
+      # Test Dockerfiles with docker build checks
+      - name: Run docker build check
+        shell: bash
+        run: |
+          echo "Checking docker/Dockerfile.debian"
+          docker build --check . -f docker/Dockerfile.debian
+          echo "Checking docker/Dockerfile.alpine"
+          docker build --check . -f docker/Dockerfile.alpine
+      # End Test Dockerfiles with docker build checks
+
   Call-next-workflow:
     permissions:
       packages: write
       contents: read
       attestations: write
       id-token: write
-    needs: build
-    uses: ./.github/workflows/container-check-templates.yml
-
+    needs: hadolint
+    uses: ./.github/workflows/container-build.yml
