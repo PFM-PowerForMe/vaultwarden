@@ -293,3 +293,4 @@ jobs:
       id-token: write
     needs: hadolint
     uses: ./.github/workflows/container-build.yml
+    secrets: inherit
