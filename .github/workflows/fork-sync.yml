@@ -1,4 +1,4 @@
-name: 'Upstream Sync'
+name: 'PFM-Upstream-Sync'
 
 permissions:
   contents: write

@@ -1,4 +1,4 @@
-name: Test Build
+name: PFM-Test-Build
 permissions: {}
 
 on:
