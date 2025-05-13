@@ -8,11 +8,6 @@ defaults:
 on:
   workflow_dispatch:  # click the button on Github repo!
   workflow_call:
-    vars:
-      DOCKERHUB_REPO:
-        required: true
-      GHCR_REPO:
-        required: true
     secrets:
       DOCKERHUB_USERNAME:
         required: true
