@@ -1,4 +1,4 @@
-name: Container build
+name: Container-build
 permissions: {}
 
 on:
