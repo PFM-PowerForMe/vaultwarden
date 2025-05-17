@@ -106,7 +106,7 @@ clean_old_backups() {
         
         if [ -n "$file_date" ] && [ "$file_date" \< "$cutoff_date" ]; then
             log "删除旧备份: $object"
-            if ! ossutil rm "$object" -c /tmp/ossconfig; then
+            if ! ossutil rm oss://my-server-backup/file/$object -c /tmp/ossconfig; then
                 log "警告: 删除 $object 失败"
             fi
         fi
