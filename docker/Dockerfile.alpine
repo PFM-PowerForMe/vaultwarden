@@ -8,7 +8,8 @@ RUN apk --no-cache add \
         7zip \
         unzip \
         gnupg \
-        expect
+        expect \
+        coreutils
 
 RUN curl https://gosspublic.alicdn.com/ossutil/install.sh | bash
 
