@@ -4,7 +4,7 @@ RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shangh
 
 RUN apt-get update && apt-get install -y \
         --no-install-recommends \
-        cron tar 7zip unzip gnupg expect && \
+        cron tar 7zip unzip gnupg expect bash && \
     apt-get clean
 
 RUN curl https://gosspublic.alicdn.com/ossutil/install.sh | bash

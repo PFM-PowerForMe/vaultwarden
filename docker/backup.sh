@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -eu
 
 # 备份设置
@@ -28,7 +28,7 @@ log() {
 		# Docker日志
 		echo "[BACKUP] ${message}" >/proc/1/fd/1 2>/proc/1/fd/2
 		# 全局日志
-		RUN_LOG+="[BACKUP] ${message}"$'\n'
+		RUN_LOG+="[BACKUP] ${message}\n"
 	fi
 }
 # 日志推送
