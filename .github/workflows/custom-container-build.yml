@@ -27,7 +27,7 @@ jobs:
 
     strategy:
       matrix:
-        base_image: ['debian', 'alpine']
+        base_image: ['alpine']
 
     steps:
       - name: Checkout

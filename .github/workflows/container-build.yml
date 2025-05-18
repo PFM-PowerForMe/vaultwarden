@@ -42,7 +42,7 @@ jobs:
       HAVE_QUAY_LOGIN: ${{ vars.QUAY_REPO != '' && secrets.QUAY_USERNAME != '' && secrets.QUAY_TOKEN != '' }}
     strategy:
       matrix:
-        base_image: ["debian","alpine"]
+        base_image: ["alpine"]
 
     steps:
       - name: Initialize QEMU binfmt support
