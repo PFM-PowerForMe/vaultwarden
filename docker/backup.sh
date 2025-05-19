@@ -201,9 +201,9 @@ clean_old_backups() {
 		file_date=$(echo "${object}" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')
 
 		if [ -n "${file_date}" ] && [ "${file_date}" \< "${cutoff_date}" ]; then
-			log "删除旧备份: ${object}"
+			log "删除旧备份: '${object}'"
 			if ! ossutil rm "${object}" -c "${OSSCONFIG}" >/dev/null 2>&1; then
-				log "警告: 删除 ${object} 失败"
+				log "警告: 删除 '${object}' 失败"
 			fi
 		fi
 	done
