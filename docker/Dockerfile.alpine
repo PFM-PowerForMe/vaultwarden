@@ -15,12 +15,10 @@ RUN curl https://gosspublic.alicdn.com/ossutil/install.sh | bash
 
 RUN rm -rf /tmp/*
 
-RUN echo '0 6 * * * root sh -c "/backup.sh"' >> /etc/crontab
-
-COPY docker/backup.sh /backup.sh
+COPY docker/backup.sh /etc/periodic/daily/backup
 COPY docker/gpg.sh /gpg.sh
 COPY docker/start-alpine.sh /start-alpine.sh
 
-RUN chmod +x /gpg.sh && chmod +x /backup.sh && chmod +x /start-alpine.sh
+RUN chmod +x /gpg.sh && chmod +x /etc/periodic/daily/backup && chmod +x /start-alpine.sh
 
 CMD ["/start-alpine.sh"]
