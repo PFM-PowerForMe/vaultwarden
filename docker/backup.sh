@@ -202,8 +202,10 @@ clean_old_backups() {
 
 		if [ -n "${file_date}" ] && [ "${file_date}" \< "${cutoff_date}" ]; then
 			log "删除旧备份: '${object}'"
+			log "删除旧备份: '${BACKUP_NAME}_${file_date}.enc'"
 			if ! ossutil rm "${object}" -c "${OSSCONFIG}" >/dev/null 2>&1; then
 				log "警告: 删除 '${object}' 失败"
+				log "警告: 删除 '${BACKUP_NAME}_${file_date}.enc' 失败"
 			fi
 		fi
 	done
