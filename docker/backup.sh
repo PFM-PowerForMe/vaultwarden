@@ -17,20 +17,17 @@ RUN_LOG=""
 
 # 日志输出
 log() {
-	local message="$(date '+%Y-%m-%d %H:%M:%S') - $1"
+    local message="$(date '+%Y-%m-%d %H:%M:%S') - $1"
 
-	if [ "${DEBUG_MODE}" -eq 1 ]; then
-		# 调试日志
-		echo "[DEBUG] ${message}" >&2
-		# 全局日志
-		RUN_LOG+="[DEBUG] ${message}\n"
-	else
-		# Docker日志
-		echo "[BACKUP] ${message}" >/proc/1/fd/1 2>/proc/1/fd/2
-		# 全局日志
-		RUN_LOG+="[BACKUP] ${message}\n"
-	fi
+    if [ "${DEBUG_MODE}" -eq 1 ]; then
+        printf "[DEBUG] %s\n" "${message}" >&2
+        RUN_LOG+=$(printf "[DEBUG] %s\n" "${message}")
+    else
+        printf "[BACKUP] %s\n" "${message}" >/proc/1/fd/1 2>/proc/1/fd/2
+        RUN_LOG+=$(printf "[BACKUP] %s\n" "${message}")
+    fi
 }
+
 # 日志推送
 push_log() {
 	for var in PUSH_URL PUSH_TOKEN; do
