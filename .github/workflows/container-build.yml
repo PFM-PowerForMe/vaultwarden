@@ -108,7 +108,7 @@ jobs:
         if: ${{ env.HAVE_DOCKERHUB_LOGIN == 'true' }}
         shell: bash
         env:
-          DOCKERHUB_REPO: ${{ vars.DOCKERHUB_REPO }}
+          DOCKERHUB_REPO: ${{ vars.DOCKERHUB_REPO }}/vaultwarden
         run: |
           echo "CONTAINER_REGISTRIES=${DOCKERHUB_REPO}" | tee -a "${GITHUB_ENV}"
 
@@ -125,7 +125,7 @@ jobs:
         if: ${{ env.HAVE_GHCR_LOGIN == 'true' }}
         shell: bash
         env:
-          GHCR_REPO: ${{ vars.GHCR_REPO }}
+          GHCR_REPO: ${{ vars.GHCR_REPO }}/vaultwarden
         run: |
           echo "CONTAINER_REGISTRIES=${CONTAINER_REGISTRIES:+${CONTAINER_REGISTRIES},}${GHCR_REPO}" | tee -a "${GITHUB_ENV}"
 
@@ -142,14 +142,14 @@ jobs:
         if: ${{ env.HAVE_QUAY_LOGIN == 'true' }}
         shell: bash
         env:
-          QUAY_REPO: ${{ vars.QUAY_REPO }}
+          QUAY_REPO: ${{ vars.QUAY_REPO }}/vaultwarden
         run: |
           echo "CONTAINER_REGISTRIES=${CONTAINER_REGISTRIES:+${CONTAINER_REGISTRIES},}${QUAY_REPO}" | tee -a "${GITHUB_ENV}"
 
       - name: Configure build cache from/to
         shell: bash
         env:
-          GHCR_REPO: ${{ vars.GHCR_REPO }}
+          GHCR_REPO: ${{ vars.GHCR_REPO }}/vaultwarden
           BASE_IMAGE: ${{ matrix.base_image }}
         run: |
           #

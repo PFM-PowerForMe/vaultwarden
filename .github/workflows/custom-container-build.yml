@@ -73,8 +73,8 @@ jobs:
           file: ./docker/Dockerfile.${{ matrix.base_image }}
           push: true
           tags: |
-            ${{ vars.DOCKERHUB_REPO }}:custom-latest-${{ matrix.base_image }}
-            ${{ vars.GHCR_REPO }}:custom-latest-${{ matrix.base_image }}
+            ${{ vars.DOCKERHUB_REPO }}/vaultwarden:custom-latest-${{ matrix.base_image }}
+            ${{ vars.GHCR_REPO }}/vaultwarden:custom-latest-${{ matrix.base_image }}
 
   ReDeploy:
     name: Deploy to Koyeb
