@@ -1,16 +1,15 @@
 name: PFM-Test-Build
-permissions: {}
 
 on:
-  workflow_dispatch:  # click the button on Github repo!
-
+  workflow_dispatch:
   push:
     branches:
       - main
-
   pull_request:
     branches:
       - main
+
+permissions: {}
 
 jobs:
   build:

@@ -1,9 +1,4 @@
 name: PFM-Custom-Container-build
-permissions: {}
-
-defaults:
-  run:
-    shell: bash
 
 on:
   workflow_dispatch:  # click the button on Github repo!
@@ -13,6 +8,12 @@ on:
         required: true
       DOCKERHUB_TOKEN:
         required: true
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   Custom-Container-build:

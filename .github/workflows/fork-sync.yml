@@ -1,8 +1,5 @@
 name: 'PFM-Upstream-Sync'
 
-permissions:
-  contents: write
-
 on:
   schedule:
     - cron: "0 20 * * *" # At UTC 20:00, every day
@@ -12,6 +9,9 @@ on:
         description: 'Fork Sync Test Mode'
         type: boolean
         default: false
+
+permissions:
+  contents: write
 
 jobs:
   sync_latest_from_upstream:
