@@ -17,7 +17,7 @@ defaults:
 
 jobs:
   Custom-Container-build:
-    name: Base-${{ matrix.base_image }}
+    name: Build Custom Container Base-${{ matrix.base_image }}
     permissions:
       packages: write
       contents: read
