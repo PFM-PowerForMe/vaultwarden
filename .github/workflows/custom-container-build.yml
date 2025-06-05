@@ -169,7 +169,7 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: Custom-Container-build
+    needs: clean
 
     steps:
       - name: 'Install and configure the Koyeb CLI'
